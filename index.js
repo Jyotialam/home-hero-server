@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+require("dotenv").config()
 const app = express();
 const port = 3000;
 
@@ -11,7 +12,7 @@ app.use(express.json());
 //mongodb
 
 const uri =
-  "mongodb+srv://home-hero-db:e62NRJB5Rl3Kcdnk@cluster0.os5glhw.mongodb.net/?appName=Cluster0";
+  `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.os5glhw.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -34,7 +35,17 @@ async function run() {
       res.send(result);
     })
 
+//
+app.get("/services/:id", async (req, res) => {
+      const { id } = req.params;
+      console.log(id);
+      const result = await serviceCollection.findOne({ _id: new ObjectId(id) });
 
+      res.send({
+        success: true,
+        result,
+      });
+    });
 
 
 // 
