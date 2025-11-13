@@ -28,7 +28,7 @@ async function run() {
 
     const db = client.db("home-hero-db");
     const serviceCollection = db.collection("services");
-    const bookingCollection = db.collection("bookings")
+    const bookingCollection = db.collection("bookings");
     //to get all services
     app.get("/services", async (req, res) => {
       const result = await serviceCollection.find().toArray();
@@ -71,11 +71,25 @@ async function run() {
     });
 
     //to get in my services page
-    app.get("/my-services", async(req,res)=>{
-      const email = req.query.email
-      const result = await serviceCollection.find({providerEmail: email}).toArray()
-      res.send(result)
-    })
+    app.get("/my-services", async (req, res) => {
+      const email = req.query.email;
+      const result = await serviceCollection
+        .find({ providerEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
+    //to delete from db
+    app.delete("/services/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await serviceCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+      res.send({
+        success: true,
+        result,
+      });
+    });
 
     //
     await client.db("admin").command({ ping: 1 });
