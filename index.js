@@ -46,18 +46,7 @@ async function run() {
         result,
       });
     });
-    //to add bookings
-    app.post("/bookings", async (req, res) => {
-      const data = req.body;
-      // console.log(data);
-      const result = await bookingCollection.insertOne(data);
-
-      res.send({
-        success: true,
-        result,
-      });
-    });
-
+   
     //to get single data
     app.get("/services/:id", async (req, res) => {
       const { id } = req.params;
@@ -93,22 +82,71 @@ async function run() {
 
 // api for update service
   app.put("/services/:id", async (req, res) => {
-      const { id } = req.params;
+  const { id } = req.params;
+  const data = req.body;
+
+  try {
+    const filter = { _id: new ObjectId(id) };
+    const updateDoc = { $set: data };
+
+    const result = await serviceCollection.updateOne(filter, updateDoc);
+
+    res.send({ success: true, result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: "Update failed" });
+  }
+});
+
+ //to add bookings
+    app.post("/bookings", async (req, res) => {
       const data = req.body;
-      // console.log(id);
       // console.log(data);
-      const ObjectId = new ObjectId(id);
-      const filtered = { _id: ObjectId };
-      const update = {
-        $set: data,
-      };
-      const result = await serviceCollection.updateOne(filtered, update);
+      const result = await bookingCollection.insertOne(data);
 
       res.send({
         success: true,
         result,
       });
     });
+
+      //to get in my bookings page
+    app.get("/my-bookings", async (req, res) => {
+      const email = req.query.email;
+      const result = await bookingCollection
+        .find({ customerEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
+    //to delete
+      app.delete("/bookings/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) });
+
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+//
+//  app.post("/downloads/:id", async(req, res) => {
+//       const data = req.body
+//       const id = req.params.id
+//       //downloads collection...
+//       const result = await downloadCollection.insertOne(data)
+//       //downloads counted 
+//       const filter = {_id: new ObjectId(id)}
+//       const update = {
+//         $inc: {
+//           downloads: 1
+//         }
+//       }
+//       const downloadCounted = await modelCollection.updateOne(filter, update)
+//       res.send({result, downloadCounted})
+//     })
 
 
 
