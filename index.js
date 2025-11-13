@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
 const port = 3000;
@@ -28,6 +28,7 @@ async function run() {
 
     const db = client.db("home-hero-db");
     const serviceCollection = db.collection("services");
+    const bookingCollection = db.collection("bookings")
     //to get all services
     app.get("/services", async (req, res) => {
       const result = await serviceCollection.find().toArray();
@@ -39,6 +40,17 @@ async function run() {
       const data = req.body;
       // console.log(data);
       const result = await serviceCollection.insertOne(data);
+
+      res.send({
+        success: true,
+        result,
+      });
+    });
+    //to add bookings
+    app.post("/bookings", async (req, res) => {
+      const data = req.body;
+      // console.log(data);
+      const result = await bookingCollection.insertOne(data);
 
       res.send({
         success: true,
@@ -57,6 +69,13 @@ async function run() {
         result,
       });
     });
+
+    //to get in my services page
+    app.get("/my-services", async(req,res)=>{
+      const email = req.query.email
+      const result = await serviceCollection.find({providerEmail: email}).toArray()
+      res.send(result)
+    })
 
     //
     await client.db("admin").command({ ping: 1 });
