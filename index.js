@@ -91,6 +91,29 @@ async function run() {
       });
     });
 
+// api for update service
+  app.put("/services/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      // console.log(id);
+      // console.log(data);
+      const ObjectId = new ObjectId(id);
+      const filtered = { _id: ObjectId };
+      const update = {
+        $set: data,
+      };
+      const result = await serviceCollection.updateOne(filtered, update);
+
+      res.send({
+        success: true,
+        result,
+      });
+    });
+
+
+
+
+
     //
     await client.db("admin").command({ ping: 1 });
     console.log(
