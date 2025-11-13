@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
-require("dotenv").config()
+require("dotenv").config();
 const app = express();
 const port = 3000;
 
@@ -11,8 +11,7 @@ app.use(express.json());
 
 //mongodb
 
-const uri =
-  `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.os5glhw.mongodb.net/?appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.os5glhw.mongodb.net/?appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -29,14 +28,14 @@ async function run() {
 
     const db = client.db("home-hero-db");
     const serviceCollection = db.collection("services");
-    //
-    app.get('/services', async(req,res)=>{
-        const result = await serviceCollection.find().toArray();
+    //to get all services
+    app.get("/services", async (req, res) => {
+      const result = await serviceCollection.find().toArray();
       res.send(result);
-    })
+    });
 
-    //
-     app.post("/services", async (req, res) => {
+    //to add services
+    app.post("/services", async (req, res) => {
       const data = req.body;
       // console.log(data);
       const result = await serviceCollection.insertOne(data);
@@ -47,8 +46,8 @@ async function run() {
       });
     });
 
-//
-app.get("/services/:id", async (req, res) => {
+    //to get single data
+    app.get("/services/:id", async (req, res) => {
       const { id } = req.params;
       console.log(id);
       const result = await serviceCollection.findOne({ _id: new ObjectId(id) });
@@ -59,8 +58,7 @@ app.get("/services/:id", async (req, res) => {
       });
     });
 
-
-// 
+    //
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
