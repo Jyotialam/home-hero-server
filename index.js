@@ -3,7 +3,7 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 //
 app.use(cors());
@@ -24,7 +24,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("home-hero-db");
     const serviceCollection = db.collection("services");
@@ -46,7 +46,7 @@ async function run() {
         result,
       });
     });
-   
+
     //to get single data
     app.get("/services/:id", async (req, res) => {
       const { id } = req.params;
@@ -80,25 +80,25 @@ async function run() {
       });
     });
 
-// api for update service
-  app.put("/services/:id", async (req, res) => {
-  const { id } = req.params;
-  const data = req.body;
+    // api for update service
+    app.put("/services/:id", async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
 
-  try {
-    const filter = { _id: new ObjectId(id) };
-    const updateDoc = { $set: data };
+      try {
+        const filter = { _id: new ObjectId(id) };
+        const updateDoc = { $set: data };
 
-    const result = await serviceCollection.updateOne(filter, updateDoc);
+        const result = await serviceCollection.updateOne(filter, updateDoc);
 
-    res.send({ success: true, result });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ success: false, message: "Update failed" });
-  }
-});
+        res.send({ success: true, result });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send({ success: false, message: "Update failed" });
+      }
+    });
 
- //to add bookings
+    //to add bookings
     app.post("/bookings", async (req, res) => {
       const data = req.body;
       // console.log(data);
@@ -110,7 +110,7 @@ async function run() {
       });
     });
 
-      //to get in my bookings page
+    //to get in my bookings page
     app.get("/my-bookings", async (req, res) => {
       const email = req.query.email;
       const result = await bookingCollection
@@ -120,10 +120,12 @@ async function run() {
     });
 
     //to delete
-      app.delete("/bookings/:id", async (req, res) => {
+    app.delete("/bookings/:id", async (req, res) => {
       const { id } = req.params;
 
-      const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) });
+      const result = await bookingCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
 
       res.send({
         success: true,
@@ -131,29 +133,21 @@ async function run() {
       });
     });
 
-//
-//  app.post("/downloads/:id", async(req, res) => {
-//       const data = req.body
-//       const id = req.params.id
-//       //downloads collection...
-//       const result = await downloadCollection.insertOne(data)
-//       //downloads counted 
-//       const filter = {_id: new ObjectId(id)}
-//       const update = {
-//         $inc: {
-//           downloads: 1
-//         }
-//       }
-//       const downloadCounted = await modelCollection.updateOne(filter, update)
-//       res.send({result, downloadCounted})
-//     })
+    //filter
+    app.get("/services", async (req, res) => {
+      const min = req.query.min ? parseInt(req.query.min) : 0;
+      const max = req.query.max ? parseInt(req.query.max) : 999999;
 
+      const query = {
+        price: { $gte: min, $lte: max },
+      };
 
-
-
+      const result = await serviceCollection.find(query).toArray();
+      res.send(result);
+    });
 
     //
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
